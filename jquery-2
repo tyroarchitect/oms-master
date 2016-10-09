@@ -1,0 +1,26 @@
+/**
+ * Created by Administrator on 2016/10/2.
+ */
+var value = 0;
+function refreshFun(){
+    if(value > 100) value =0;
+    var valueStr = value +"%";
+    $("#test").css("width",valueStr);
+    value += 10;
+}
+setInterval(refreshFun,1000);
+
+$("tr").click(function(e){
+    if(!e.currentTarget.getAttribute("checked")){
+        e.currentTarget.setAttribute("checked","true");
+        e.currentTarget.setAttribute("style","background-color:blue");
+    } else {
+        e.currentTarget.setAttribute("checked","");
+        e.currentTarget.setAttribute("style","background-color:white");
+    }
+});
+$("#btn").click(function(){
+    var appendedEle = $("#table1 [checked = 'true']").clone();
+    appendedEle.css("background-color","white");
+    $("#table2").append(appendedEle);
+});
