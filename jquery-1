@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Bootstrap 实例 - 进度条</title>
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .qqq{
+            display: block;
+        }
+        .ttt{
+            float: left;
+            padding: 0 50px 0 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress">
+    <div class="progress-bar" role="progressbar" aria-valuenow="60"
+         aria-valuemin="0" aria-valuemax="100" id="test">
+        <span class="sr-only">40% 完成</span>
+    </div>
+</div>
+<div style="height: 200px;width: 100%;">
+    <div id="table1" class="ttt" style="width: 33%;overflow: auto ">
+        <table class="table table-condensed">
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>城市</th>
+                <th>密码</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Tanmay</td>
+                <td>Bangalore</td>
+                <td>560001</td>
+            </tr>
+            <tr>
+                <td>Sachin</td>
+                <td>Mumbai</td>
+                <td>400003</td>
+            </tr>
+            <tr>
+                <td>Uma</td>
+                <td>Pune</td>
+                <td>411027</td>
+            </tr>
+            <tr>
+                <td>Uma</td>
+                <td>Pune</td>
+                <td>411027</td>
+            </tr>
+            <tr>
+                <td>Uma</td>
+                <td>Pune</td>
+                <td>411027</td>
+            </tr>
+            <tr>
+                <td>Uma</td>
+                <td>Pune</td>
+                <td>411027</td>
+            </tr>
+            <tr>
+                <td>Uma</td>
+                <td>Pune</td>
+                <td>411027</td>
+            </tr>
+            <tr>
+                <td>Uma</td>
+                <td>Pune</td>
+                <td>411027</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="height: 100%;width:33%;position: relative;" class="ttt">
+        <button id="btn" style="position:absolute;width:100px;height:50px;top:10px;bottom: 10px;left:10px;right:10px;margin: auto;">select to</button>
+    </div>
+    <table id="table2" class="table table-condensed ttt" style="width: 33%;overflow: auto; ">
+        <thead>
+        <tr>
+            <th>名称</th>
+            <th>城市</th>
+            <th>密码</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+<script src="test.js"></script>
+</body>
+</html>
