@@ -1,0 +1,150 @@
+http://www.lxway.com/8554994.htm
+流程：自我介绍=====>自己公司centos系统版本、Nginx、MySQL、PHP各软件版本介绍======>自己公司架构介绍======>自己负责架构中的哪部分工作（含优化）====>曾经遇到到哪些问题====>待面试官提问
+
+曾问到问题如下：
+
+数据库部分：
+
+（1）MySQL数据库与NoSQL数据库的区别、memcached与redis区别？（三家全问）
+关系型数据库：指采用了关系模型来组织数据的数据库，关系模型指的就是二维表格模型，即行（记录）和列（字段）的结构。如：SQL Server，Oracle，MySQL。
+非关系型数据库：运用非关系型的数据存储，让数据集合之间不再有关系的概念，每个集合都是独立的，可以使用冗余的机制去解决所谓“关系”的问题。如：MongoDB，Redis
+
+区别：
+Mysql: 使用二维表格存储数据。最大特点就是支持事务的一致性；可以通过sql语言操作，使用方便；维护方便。（读写性能比较差，高并发、大数据存在瓶颈，只能存储在二维表中。）
+Nosql：使用键值对存储数据。数据没有耦合性，容易扩展；无需经过sql层的解析，读写性能很高；存储方式多，如文档，哈希表等。（不支持事务功能，不支持sql语言）
+
+a)存储方式：SQL数据存在特定结构的表中；而NoSQL则更加灵活和可扩展，存储方式可以是JSON文档、哈希表或者其他方式。
+b)表/数据集合的数据的关系：在SQL中，必须定义好表和字段结构后才能添加数据，例如定义表的主键(primary key)，索引(index),触发器(trigger),存储过程(stored procedure)等。表结构可以在被定义之后更新，但是如果有比较大的结构变更的话就会变得比较复杂。在NoSQL中，数据可以在任何时候任何地方添加，不需要先定义表
+c)外部数据存储：SQL中如何需要增加外部关联数据的话，规范化做法是在原表中增加一个外键，关联外部数据表。NoSQL中除了这种规范化的外部数据表做法以外，我们还能用如下的非规范化方式把外部数据直接放到原数据集中，以提高查询效率。
+d) SQL中的JOIN查询：SQL中可以在一条语句中使用JOIN表链接方式进行多表关联查询。
+e)数据耦合性：SQL中不允许删除已经被使用的外部数据，以保证数据完整性。而NoSQL中则没有这种强耦合的概念，可以随时删除任何数据。
+f)事务：SQL中如果多张表数据需要同批次被更新，即如果其中一张表更新失败的话其他表也不能更新成功。这种场景可以通过事务来控制，可以在所有命令完成后再统一提交事务（回滚和提交）。而NoSQL中没有事务这个概念。
+g)用途：关系型数据库适合存储结构化数据，如用户的帐号、地址。这些数据通常需要做结构化查询；数据的规模、增长的速度通常是可以预期的；需要支持事务性和一致性。NoSQL适合存储非结构化数据，如文章、评论。这些数据通常用于模糊处理，如全文搜索；这些数据是海量的，而且增长的速度是难以预期的，伸缩性强；按key获取数据效率高，并且大多是将数据映射到内存中去处理，读写速度高。
+
+memcached与redis区别:
+1)Memcached基本只支持简单的key-value存储，Redis支持更复杂的数据结构和更丰富的数据操作（支持list，set，zset，hashs等数据结构的存储）。
+2)Redis支持数据的持久化，可以将内存中的数据保持在磁盘中，可以备份
+3)Memcached是多线程，非阻塞IO复用的网络模型，分为监听主线程和worker子线程，多线程模型可以发挥多核作用，同时引入了锁，带来了性能损耗; Redis使用单线程的IO复用模型
+4)Memcached使用预分配的内存池的方式，使用slab和大小不同的chunk来管理内存，Item根据大小选择合适的chunk存储，内存池的方式可以省去申请/释放内存的开销，并且能减少内存碎片产生，当时带来一定程度的空间浪费，并且在内存仍然有很大空间时，新的数据也可能会被剔除。Redis使用现场申请内存的方式来存储数据，不会剔除任何非临时数据，但是更容易存在内存碎片
+5)Memcached提供了cas命令，可以保证多个并发访问操作同一份数据的一致性问题。
+
+（2）MySQL主从同步的原理？（三家全问）
+原理：master 上提供binlog ,
+slave 通过I/O线程从master拿取 binlog,并复制到slave的中继日志中
+slave 通过SQL线程从slave的中继日志中读取binlog ,然后解析到slave数据库中
+步骤：
+1) 核对mysql版本一致(或从高于主)
+2）在主服务器上建立slave帐户并授权
+3）修改主服务器配置文件my.cnf：启用二进制日志,，设置server-id
+4）修改从服务器配置文件my.cnf：设置server-id
+5）重启两台服务器（主服务器要锁表：flush tables with read lock;）
+6）登录主服务器的mysql，查询master的状态（>show master status;）
+7）登录从服务器的mysql，执行>change master to（主地址,用户名,密码,日志文件，位置点）然后启动同步>start slave
+8) 检查从服务器复制功能状态>show slave status; （slave_IO及slave_SQL均显示YES）
+9）主从服务器测试（主服务器要解锁表unlock tables;）
+
+（3）一主多从、A-B-C级联、主主双写怎样实现？（后两家公司问）
+一主多从：主--创建多个slave账户
+A-B-C级联：B从（1）启用二进制日志log-bin;（2）log_slave_updates=1 
+（4）基于memcached的session会话共享怎样实现？（前两家公司问）
+通过修改php配置文件（php.ini），将session的存储机制设置为同一组memcached服务器。(session.save_handler = memcache session.save_path = "tcp://192.168.0.9:11211")
+（5）MySQL的读写分离如何实现？（三家全问，我说的是开始用mysqlproxy或Amoeba，后来改用程序开发实现）
+
+WEB服务器部分：
+
+（1）select模型与epoll模型的区别？（后两家公司问）
+1）select的句柄数目受限，最多同时监听1024个fd，而epoll没有最大并发连接的限制，它的限制是进程能打开的最大文件数目限制。
+2）select效率低，采用轮询的方式；epoll是类似触发的方式，只会对"活跃"的socket进行操作，通过调用 callback函数把这个句柄加入队列里面。当该socket收到数据或者其他事件触发时，会调用sock_def_readable 或者sock_def_write_space 通知函数来唤醒等待的进程。（如果连接很多，大部分连接都活跃时，两者的效率应该是差不多的。）
+（2）Nginx基本优化都有哪些？（老师讲过20多条，说出10条左右就差不多）
+http://www.z-dig.com/nginx-optimization-25.html  nginx配置文件参数设置；fastcgi优化；内核优化
+1）隐藏或更改nginx名称和版本号；2）更改nginx默认用户及用户组；3)根据系统选不同事件模型（linux2.6选epoll）；4）配置nginx worker进程个数（cpu核数或2倍）；
+5)设置单个进程最大连接数；6）设置worker进程能打开的最大文件数；7）设置连接超时时间；8）配置gzip压缩功能；9）配置expires缓存时间；10）防盗链，防爬虫配置；11）fascgi和内核优化
+（3）怎么处理网站防盗链？(第一家公司问过）
+1）判断引用地址：判断http的referer字段的值 2）监控异常流量，屏蔽ip； 3）使用图像验证码,cookie,登录等验证4）
+（4）你公司的并发访问量是多少？独立IP是多少？日PV值时多少（第一家公司问过）
+
+（5）DNS、http请求原理（第一家公司问过）
+http://369369.blog.51cto.com/319630/812889/http://www.mamicode.com/info-detail-1357508.html
+本地hosts→缓存→首选dns服务器→本地区域资源→缓存→无转发则请求13台根服务器(否则转到上一级dns服务器)→返回顶级域名服务器ip→返回下一级域名服务器ip→直到找到返回要的ip。
+建立TCP连接(通过三次握手建立socket连接)→客户端发送http请求报文（请求行，请求头部、空行、请求数据）→web服务器发送响应报文（状态行、响应头部、空行、响应数据→若connection模式为close，则服务器主动关闭TCP 连接，connection 模式为keep-alive，则该连接会保持一段时间。
+请求行：由请求方法、URL和HTTP协议版本3个字段组成
+请求头部：浏览器类型、要请求的主机名、Connection连接方式、Cookie等
+状态行：由HTTP协议版本、响应状态码和响应状态码的文本描述组成。
+响应头部：Location重定向、Server包含服务器用来处理请求的软件信息及其版本、Connection连接方式等
+（6）web服务器错误代码：200、301、302、403、404、500、502、503、504（第一家公司问过）
+200：客户端请求成功的响应状态码301：永久重定向 302：临时重定向 403：服务器拒绝提供服务(web目录权限) 404：请求的资源不存在 500：内部服务器错误 502：服务器后端错误503：服务器维护（数据库关闭） 504：服务器后端响应超时
+负载均衡proxy代理服务器部分：
+（1）Upstream标签功能（三家公司全问）
+1）通过upstream指令定义负载均衡器名称，用于后面调用。
+2）通过server指令指定后端服务器的IP地址和端口或域名
+3）设定后端服务器在负载均衡调度中的状态。（可以检查健康状态）
+4）设置负载均衡调度算法。
+（2）LVS四层负载均衡与Nginx七层负载均衡原理（后两家公司问）
+http://freeloda.blog.51cto.com/2033581/1288553
+四层通过虚拟IP+端口接收请求，然后再分配到真实的服务器；七层通过虚拟的URL或主机名接收请求，然后再分配到真实的服务器。
+LVS实现服务器集群负载均衡有三种方式，NAT，DR和TUN模式。
+NAT：通过网络地址转换，调度器修改客户端请求报文的目标地址，根据预设的调度算法，将请求分配给后端的真实服务器；同时修改realserver响应报文的源地址，通过调度器返回给客户端。
+DR：通过修改请求报文的MAC地址，将请求发送到真实服务器，realserver直接将响应数据返回给客户端，不经过调度端。
+TUN：调度器把请求报文通过IP隧道（将一个IP报文封装在另一个IP报文的技术）转发至真实服务器，而真实服务器将响应直接返回给客户端。
+nginx通过upstream模块来实现负载均衡，利用http proxy代理模块将请求转发到其它服务器。
+
+（3）keepalived高可用原理（后两家问）
+http://outofmemory.cn/wiki/keepalived-configuration
+keepalived是以VRRP协议为实现基础的，VRRP全称Virtual Router Redundancy Protocol，即虚拟路由冗余协议。
+虚拟路由冗余协议，可以认为是实现路由器高可用的协议，即将N台提供相同功能的路由器组成一个路由器组，这个组里面有一个master和多个backup，master上面有一个对外提供服务的vip（该路由器所在局域网内其他机器的默认路由为该vip），master会发组播，当backup收不到vrrp包时就认为master宕掉了，这时就需要根据VRRP的优先级来选举一个backup当master。这样的话就可以保证路由器的高可用了。
+keepalived主要有三个模块，分别是core、check和vrrp。core模块为keepalived的核心，负责主进程的启动、维护以及全局配置文件的加载和解析。check负责健康检查，包括常见的各种检查方式。vrrp模块是来实现VRRP协议的。
+（4）ip-hash、rr轮询权重轮询的不同及实现（结合session会话共享来说）（三家全问）
+
+shell脚本部分：问的比较简单
+
+（1）写个脚本计算从0加到100？（就一家问过）
+Shell:
+#!/bin/bash
+s=0                          s=0                    s=0;i=0
+for (( i = 0; i < 100; i++ )) ;dofor i in `seq 1 100`;do     while[I –le 100];do
+s=$[ ${s + ${i} ]s=`expr $s + $i`            ((s=$s+$i))
+donedone                      ((i=$i+1))
+echo $s                                             done           
+
+python:               i=1 
+for iin range(101) :      while i<100 :
+  s=s+i                 s=s+i
+print s                  i=i+1
+
+（2）统计/var/log/message访问日志里不同ip地址出现的次数，然后相加求和
+Shell:
+cat  /var/log/message |awk ‘{print $1}’|sort|uniq –c|sort –nr|head –n 10
+
+
+
+
+
+python:
+s = {}
+lines= open("/var/log/nginx/access.log", "r").readlines()
+for line in lines:
+  ip = line.split(" ")[0]或ip=re.compile(r’^\d+\.\d+\.\d+\.\d+’).match(line); ip=ip[0]
+  if 6 < len(ip) <=15:
+    s[ip] = s.get(ip, 0) + 1
+result = sorted(s.iteritems(), key=lambda d:d[1]，reverse=True)
+ for i in result.keys():
+   print i , result[i]
+（3）一些基础命令的使用，例如awk、sed、grep等（问的不多）
+
+企业里层遇到的问题：
+
+我之前把老师的blog，大概都看了一遍，基本上在跟面试官讲解架构的同时，把遇到的企业案例顺便说了，我说的几个企业案例如下：
+
+（1）某电商网站数据库宕机故障解决实录
+
+http://oldboy.blog.51cto.com/2561410/1431161/
+
+（2）“nospace left on device”磁盘报错(课堂详细讲过的)
+
+（3）公司里数据库负载高，因为网站前端搜索框对外提供搜索导致案例(课堂详细讲过的)。
+
+其他相关问题：
+
+（1）能否适应加班？
+
+（2）以后的人生规划发展？
